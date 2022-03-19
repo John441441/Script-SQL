@@ -1,0 +1,54 @@
+import mysql.connector
+
+
+myconn = mysql.connector.connect(host="127.0.0.1", user="root", passwd="Blade441", database="Credit_system")
+
+
+cur = myconn.cursor()
+id_credit = int(input('Введите id-номер нужного кредита: '))
+list_credit = list()
+summ_credit = 0
+rate12 = 0
+credit_term = 0
+debt = 0
+
+try:
+
+    cur.execute("SELECT * FROM credit WHERE id_credit = {id}".format(id = id_credit))
+
+    result = cur.fetchall()
+
+
+    for i in result:
+        for i2 in i:
+            list_credit.append(i2)
+
+
+    for i in range(0, len(list_credit)):
+        if i == 1:
+            summ_credit = list_credit[i]
+            print('Сумма кредита:', list_credit[i])
+        if i == 2:
+            rate_12 = list_credit[i]
+            rate_1 = rate_12/12
+            print('Ставка:', list_credit[i])
+        if i == 5:
+            credit_term = list_credit[i]
+            print('Срок кредита:', list_credit[i])
+
+    monthly_payment = summ_credit * rate_1 + (rate_1/((1+rate_1)**credit_term-1))
+    full_debt = summ_credit + summ_credit/100 * rate_12 * (credit_term/12)
+    percent = (summ_credit * rate_12/100)/365 * 30
+    month_debt = monthly_payment - percent
+
+    print("Месяц", "Еж.платёж", "Основной долг", "Проценты", "Остаток долга")
+    for i in range(1, credit_term+1):
+        full_debt -= monthly_payment
+        percent = (summ_credit * rate_12 / 100) / 365 * 30
+        month_debt = monthly_payment - percent
+        print(i, monthly_payment, month_debt, percent, full_debt)
+
+
+except:
+    print('Error!')
+    myconn.rollback()
